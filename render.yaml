@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: reduction-facture-electricite-lyon
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /
+    disks:
+      - name: leads-data
+        mountPath: /var/data
+        sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATA_DIR
+        value: /var/data
+      - key: SITE_URL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 3000

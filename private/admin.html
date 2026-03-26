@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Leads</title>
+    <style>
+      :root {
+        --bg: #f4f6f8;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --accent: #1f2937;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container {
+        width: min(1200px, 94%);
+        margin: 24px auto 40px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgb(17 24 39 / 8%);
+      }
+      .top {
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 1.6rem;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 120px 120px;
+        gap: 10px;
+      }
+      input,
+      select,
+      button {
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: inherit;
+      }
+      button {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .table-wrap {
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1460px;
+      }
+      th,
+      td {
+        border-top: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 0.92rem;
+      }
+      th {
+        position: sticky;
+        top: 0;
+        background: #fbfbfc;
+        z-index: 1;
+      }
+      .badge {
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-block;
+      }
+      .ok {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .no {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 12px 0 8px;
+      }
+      .toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .status {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .logout {
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: #fff;
+        color: #111827;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      @media (max-width: 820px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="card top">
+        <h1>Leads qualifiés</h1>
+        <p class="muted">Recherche par nom, prénom, téléphone ou email.</p>
+        <div class="controls">
+          <input id="search" type="text" placeholder="Ex: Martin, 06..., email..." />
+          <select id="limit">
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+          </select>
+          <button id="refresh">Actualiser</button>
+        </div>
+      </section>
+
+      <section class="card table-wrap">
+        <div class="toolbar">
+          <div id="count" class="status">Chargement...</div>
+          <div class="toolbar-right">
+            <div id="last-updated" class="status"></div>
+            <button id="logout" class="logout" type="button">Déconnexion</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Téléphone</th>
+              <th>Email</th>
+              <th>Priorité</th>
+              <th>Proprio</th>
+              <th>Linky</th>
+              <th>Facture</th>
+              <th>Source</th>
+              <th>Campagne</th>
+              <th>Landing</th>
+              <th>Consent. contact</th>
+              <th>Consent. partenaires</th>
+              <th>Consent. politique</th>
+              <th>Version politique</th>
+              <th>Date consent.</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      const rowsEl = document.getElementById("rows");
+      const countEl = document.getElementById("count");
+      const lastUpdatedEl = document.getElementById("last-updated");
+      const searchEl = document.getElementById("search");
+      const limitEl = document.getElementById("limit");
+      const refreshBtn = document.getElementById("refresh");
+      const logoutBtn = document.getElementById("logout");
+
+      const toBadge = (value) =>
+        value
+          ? '<span class="badge ok">Oui</span>'
+          : '<span class="badge no">Non</span>';
+
+      const toPriority = (lead) => {
+        const isQualified =
+          lead.proprietaire_maison === "oui" &&
+          lead.compteur_linky === "oui" &&
+          Number(lead.facture_mensuelle || 0) >= 90;
+
+        return isQualified
+          ? '<span class="badge ok">Chaude</span>'
+          : '<span class="badge no">À vérifier</span>';
+      };
+
+      const formatDate = (iso) => {
+        try {
+          return new Date(iso).toLocaleString("fr-FR");
+        } catch {
+          return iso;
+        }
+      };
+
+      const escapeHtml = (value) =>
+        String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+
+      const renderRows = (leads) => {
+        if (!Array.isArray(leads) || leads.length === 0) {
+          rowsEl.innerHTML = '<tr><td colspan="17" class="muted">Aucun lead trouvé.</td></tr>';
+          return;
+        }
+
+        rowsEl.innerHTML = leads
+          .map(
+            (lead) => `
+            <tr>
+              <td>${formatDate(lead.created_at)}</td>
+              <td>${escapeHtml(lead.nom)}</td>
+              <td>${escapeHtml(lead.prenom)}</td>
+              <td>${escapeHtml(lead.telephone)}</td>
+              <td>${escapeHtml(lead.email)}</td>
+              <td>${toPriority(lead)}</td>
+              <td>${escapeHtml(lead.proprietaire_maison)}</td>
+              <td>${escapeHtml(lead.compteur_linky)}</td>
+              <td>${Number(lead.facture_mensuelle || 0).toFixed(0)} €</td>
+              <td>${escapeHtml(lead.utm_source || lead.utm_medium || "direct")}</td>
+              <td>${escapeHtml(lead.utm_campaign || "-")}</td>
+              <td>${escapeHtml(lead.landing_path || "-")}</td>
+              <td>${toBadge(Boolean(lead.consent_contact))}</td>
+              <td>${toBadge(Boolean(lead.consent_partenaires_solaires))}</td>
+              <td>${toBadge(Boolean(lead.consent_policy_ack))}</td>
+              <td>${escapeHtml(lead.politique_version || "-")}</td>
+              <td>${formatDate(lead.consented_at)}</td>
+            </tr>
+          `
+          )
+          .join("");
+      };
+
+      const loadLeads = async () => {
+        const params = new URLSearchParams({
+          search: searchEl.value.trim(),
+          limit: limitEl.value
+        });
+
+        countEl.textContent = "Chargement...";
+
+        try {
+          const response = await fetch(`/api/admin/leads?${params.toString()}`);
+          const payload = await response.json();
+
+          if (!response.ok || !payload.ok) {
+            throw new Error(payload.message || "Erreur de chargement");
+          }
+
+          renderRows(payload.leads);
+          countEl.textContent = `${payload.count} lead(s)`;
+          lastUpdatedEl.textContent = `Mis à jour : ${new Date().toLocaleTimeString("fr-FR")}`;
+        } catch (error) {
+          rowsEl.innerHTML = `<tr><td colspan="17">${escapeHtml(error.message)}</td></tr>`;
+          countEl.textContent = "Erreur";
+        }
+      };
+
+      refreshBtn.addEventListener("click", loadLeads);
+      searchEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          loadLeads();
+        }
+      });
+      limitEl.addEventListener("change", loadLeads);
+      logoutBtn.addEventListener("click", async () => {
+        await fetch("/admin/logout", { method: "POST" });
+        window.location.href = "/admin/login";
+      });
+
+      loadLeads();
+    </script>
+  </body>
+</html>
