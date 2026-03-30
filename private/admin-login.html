@@ -84,50 +84,13 @@
       <h1>Admin Leads</h1>
       <p>Connecte-toi pour accéder au tableau des leads.</p>
 
-      <form id="login-form">
+      <form id="login-form" method="post" action="/admin/login">
         <label for="password">Mot de passe admin</label>
         <input id="password" type="password" name="password" required autocomplete="current-password" />
         <button id="btn" type="submit">Se connecter</button>
         <div id="msg" class="msg" aria-live="polite"></div>
       </form>
     </main>
-
-    <script>
-      const form = document.getElementById("login-form");
-      const msg = document.getElementById("msg");
-      const btn = document.getElementById("btn");
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        msg.textContent = "";
-        msg.className = "msg";
-
-        const payload = { password: form.password.value };
-
-        btn.disabled = true;
-        btn.textContent = "Connexion...";
-
-        try {
-          const response = await fetch("/admin/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await response.json();
-          if (!response.ok || !data.ok) {
-            throw new Error(data.message || "Connexion impossible");
-          }
-
-          window.location.href = "/admin";
-        } catch (error) {
-          msg.textContent = error.message || "Erreur";
-          msg.classList.add("err");
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "Se connecter";
-        }
-      });
-    </script>
+    <script src="/admin-login.js" defer></script>
   </body>
 </html>
