@@ -234,18 +234,44 @@
               <div class="field-row">
                 <div class="field">
                   <label for="nom">Nom *</label>
-                  <input id="nom" name="nom" type="text" autocomplete="family-name" required />
+                  <input
+                    id="nom"
+                    name="nom"
+                    type="text"
+                    autocomplete="family-name"
+                    pattern="[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,60}"
+                    maxlength="60"
+                    required
+                  />
+                  <span id="nom-error" class="field-error" aria-live="polite"></span>
                 </div>
 
                 <div class="field">
                   <label for="prenom">Prénom *</label>
-                  <input id="prenom" name="prenom" type="text" autocomplete="given-name" required />
+                  <input
+                    id="prenom"
+                    name="prenom"
+                    type="text"
+                    autocomplete="given-name"
+                    pattern="[A-Za-zÀ-ÖØ-öø-ÿ'-]{2,60}"
+                    maxlength="60"
+                    required
+                  />
+                  <span id="prenom-error" class="field-error" aria-live="polite"></span>
                 </div>
               </div>
 
               <div class="field">
                 <label for="telephone">Téléphone *</label>
-                <input id="telephone" name="telephone" type="tel" autocomplete="tel" required />
+                <input
+                  id="telephone"
+                  name="telephone"
+                  type="tel"
+                  autocomplete="tel"
+                  inputmode="numeric"
+                  maxlength="14"
+                  required
+                />
                  <span id="telephone-error" class="field-error" aria-live="polite"></span>
               </div>
 

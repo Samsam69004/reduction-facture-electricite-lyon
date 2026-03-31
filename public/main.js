@@ -4,6 +4,11 @@ const submitBtn = document.querySelector("#submit-btn");
 const year = document.querySelector("#year");
 const qualificationHint = document.querySelector("#qualification-hint");
 const phoneInput = document.querySelector("#telephone");
+const lastNameInput = document.querySelector("#nom");
+const firstNameInput = document.querySelector("#prenom");
+
+const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
+const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 // Phone number formatter (French format: 06 XX XX XX XX)
 const formatPhoneNumber = (value) => {
@@ -18,7 +23,14 @@ const formatPhoneNumber = (value) => {
 
 const isValidFrenchPhone = (value) => {
   const cleaned = value.replace(/\D/g, "");
-  return cleaned.length === 10 && /^[0-9]{10}$/.test(cleaned);
+  return /^0[1-9][0-9]{8}$/.test(cleaned);
+};
+
+const sanitizeName = (value) => {
+  return String(value || "")
+    .normalize("NFC")
+    .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ'-]/g, "")
+    .slice(0, 60);
 };
 
 // Add phone input masking
@@ -27,6 +39,16 @@ if (phoneInput) {
     e.target.value = formatPhoneNumber(e.target.value);
   });
 }
+
+[lastNameInput, firstNameInput].forEach((input) => {
+  if (!input) {
+    return;
+  }
+
+  input.addEventListener("input", (event) => {
+    event.target.value = sanitizeName(event.target.value);
+  });
+});
 
 const seedTrackingFields = () => {
   const params = new URLSearchParams(window.location.search);
@@ -70,14 +92,21 @@ if (form) {
     let isValid = true;
     let errorMsg = "";
 
-    if (field.name === "telephone") {
+    if (field.name === "nom" || field.name === "prenom") {
+      if (!value) {
+        isValid = false;
+        errorMsg = "Champ obligatoire";
+      } else if (!nameRegex.test(value) || value.length < 2) {
+        isValid = false;
+        errorMsg = "Utilisez un vrai nom/prénom (lettres uniquement)";
+      }
+    } else if (field.name === "telephone") {
       if (value && !isValidFrenchPhone(value)) {
         isValid = false;
         errorMsg = "Format: 06 XX XX XX XX";
       }
     } else if (field.name === "email" && value) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
+      if (!emailRegex.test(value) || value.includes("..") || value.startsWith(".") || value.endsWith(".")) {
         isValid = false;
         errorMsg = "Email invalide";
       }
@@ -176,6 +205,10 @@ if (form) {
 
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
+    payload.nom = sanitizeName(payload.nom);
+    payload.prenom = sanitizeName(payload.prenom);
+    payload.telephone = String(payload.telephone || "").replace(/\D/g, "");
+    payload.email = String(payload.email || "").trim();
 
     submitBtn.disabled = true;
     submitBtn.setAttribute("aria-busy", "true");
@@ -196,11 +229,8 @@ if (form) {
         throw new Error(data.message || "Impossible d'envoyer votre demande.");
       }
 
-      form.reset();
-      seedTrackingFields();
-      formMessage.textContent = "✓ Merci ! Un partenaire vous contactera rapidement pour votre étude.";
-      formMessage.classList.add("success");
-      qualificationHint.textContent = "";
+      window.location.assign("/merci");
+      return;
     } catch (error) {
       formMessage.textContent = error.message || "Une erreur est survenue. Veuillez réessayer.";
       formMessage.classList.add("error");

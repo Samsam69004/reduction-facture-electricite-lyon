@@ -494,6 +494,52 @@ button:disabled:hover {
   text-align: center;
 }
 
+.merci-main {
+  padding-top: 72px;
+  padding-bottom: 72px;
+}
+
+.thank-you-banner {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  border-top: 8px solid var(--success);
+  background:
+    radial-gradient(circle at 12% 18%, rgb(4 120 87 / 10%), transparent 35%),
+    radial-gradient(circle at 86% 84%, rgb(244 181 77 / 14%), transparent 42%),
+    #fff;
+}
+
+.thank-you-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.8rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(140deg, #10b981, #047857);
+  box-shadow: 0 10px 24px rgb(4 120 87 / 28%);
+}
+
+.thank-you-kicker {
+  margin: 0 0 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--success);
+}
+
+.thank-you-note {
+  margin: 0 auto 1.2rem;
+  max-width: 54ch;
+  color: #334155;
+  font-weight: 500;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -528,5 +574,14 @@ button:disabled:hover {
   .field-row {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .merci-main {
+    padding-top: 44px;
+    padding-bottom: 52px;
+  }
+
+  .thank-you-banner {
+    padding: 1rem;
   }
 }

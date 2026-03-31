@@ -163,6 +163,10 @@ const getRetentionCutoffIso = () => {
   return new Date(Date.now() - leadRetentionDays * 24 * 60 * 60 * 1000).toISOString();
 };
 
+const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
+const frenchPhoneRegex = /^0[1-9][0-9]{8}$/;
+const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 const purgeExpiredLeads = async () => {
   const cutoff = getRetentionCutoffIso();
   await runAsync(db, "DELETE FROM leads WHERE created_at < ?", [cutoff]);
@@ -541,6 +545,15 @@ app.get("/politique-confidentialite.html", async (req, res) => {
   }
 });
 
+app.get("/merci", async (req, res) => {
+  try {
+    const html = await renderPublicTemplate("merci.html");
+    res.type("html").send(html);
+  } catch (error) {
+    res.status(500).type("text/plain").send("Erreur de chargement de la page.");
+  }
+});
+
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
   res.send(
@@ -564,6 +577,12 @@ app.get("/sitemap.xml", (req, res) => {
     <lastmod>${lastModified}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>${normalizedUrl}/merci</loc>
+    <lastmod>${lastModified}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.2</priority>
   </url>
 </urlset>`;
   res.type("application/xml");
@@ -592,9 +611,9 @@ app.post("/api/leads", async (req, res) => {
   } = req.body;
 
   const bill = Number.parseFloat(factureMensuelle);
-  const normalizedPhone = typeof telephone === "string" ? telephone.trim() : "";
-  const normalizedLastName = typeof nom === "string" ? nom.trim() : "";
-  const normalizedFirstName = typeof prenom === "string" ? prenom.trim() : "";
+  const normalizedPhone = typeof telephone === "string" ? telephone.replace(/\D/g, "") : "";
+  const normalizedLastName = typeof nom === "string" ? nom.trim().normalize("NFC") : "";
+  const normalizedFirstName = typeof prenom === "string" ? prenom.trim().normalize("NFC") : "";
   const normalizedEmail = typeof email === "string" ? email.trim() : "";
   const normalizedUtmSource = typeof utmSource === "string" ? utmSource.trim().slice(0, 120) : "";
   const normalizedUtmMedium = typeof utmMedium === "string" ? utmMedium.trim().slice(0, 120) : "";
@@ -611,6 +630,33 @@ app.post("/api/leads", async (req, res) => {
     return res.status(400).json({
       ok: false,
       message: "Nom, prénom et téléphone sont obligatoires."
+    });
+  }
+
+  if (!nameRegex.test(normalizedLastName) || !nameRegex.test(normalizedFirstName)) {
+    return res.status(400).json({
+      ok: false,
+      message: "Nom et prénom invalides. Utilisez uniquement des lettres, tirets ou apostrophes."
+    });
+  }
+
+  if (!frenchPhoneRegex.test(normalizedPhone)) {
+    return res.status(400).json({
+      ok: false,
+      message: "Numéro de téléphone invalide (format attendu: 10 chiffres français)."
+    });
+  }
+
+  if (
+    normalizedEmail &&
+    (!emailRegex.test(normalizedEmail) ||
+      normalizedEmail.includes("..") ||
+      normalizedEmail.startsWith(".") ||
+      normalizedEmail.endsWith("."))
+  ) {
+    return res.status(400).json({
+      ok: false,
+      message: "Adresse email invalide."
     });
   }
 
