@@ -910,6 +910,50 @@ app.get("/api/admin/leads", requireAdminAuth, async (req, res) => {
   }
 });
 
+app.get("/api/admin/diagnostics", requireAdminAuth, async (req, res) => {
+  try {
+    await purgeExpiredLeads();
+
+    const leadStats = await getAsync(
+      db,
+      `SELECT
+        COUNT(*) AS total,
+        MIN(created_at) AS oldest,
+        MAX(created_at) AS newest
+       FROM leads`
+    );
+
+    let dbFileExists = false;
+    let dbFileSizeBytes = 0;
+
+    try {
+      const stat = await fs.stat(dbFile);
+      dbFileExists = true;
+      dbFileSizeBytes = stat.size;
+    } catch (error) {
+      if (error && error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+
+    return res.json({
+      ok: true,
+      diagnostics: {
+        dataDir,
+        dbFile,
+        dbFileExists,
+        dbFileSizeBytes,
+        leadRetentionDays,
+        totalLeads: Number(leadStats?.total || 0),
+        oldestLeadAt: leadStats?.oldest || null,
+        newestLeadAt: leadStats?.newest || null
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, message: "Erreur de lecture du diagnostic." });
+  }
+});
+
 app.get("/api/admin/deliveries", requireAdminAuth, async (req, res) => {
   const rawLimit = Number.parseInt(String(req.query.limit || "50"), 10);
   const limit = Number.isNaN(rawLimit) ? 50 : Math.min(Math.max(rawLimit, 1), 200);
