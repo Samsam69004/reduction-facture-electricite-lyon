@@ -503,11 +503,22 @@ button:disabled:hover {
   max-width: 760px;
   margin: 0 auto;
   text-align: center;
-  border-top: 8px solid var(--success);
+  border-top: 10px solid #059669;
+  border-left: 1px solid #bbf7d0;
+  border-right: 1px solid #bbf7d0;
+  border-bottom: 1px solid #bbf7d0;
   background:
-    radial-gradient(circle at 12% 18%, rgb(4 120 87 / 10%), transparent 35%),
-    radial-gradient(circle at 86% 84%, rgb(244 181 77 / 14%), transparent 42%),
+    radial-gradient(circle at 12% 18%, rgb(5 150 105 / 13%), transparent 35%),
+    radial-gradient(circle at 86% 84%, rgb(16 185 129 / 12%), transparent 42%),
     #fff;
+}
+
+.thank-you-logo {
+  display: block;
+  width: min(280px, 72%);
+  height: auto;
+  margin: 0 auto 0.9rem;
+  object-fit: contain;
 }
 
 .thank-you-icon {
@@ -520,8 +531,8 @@ button:disabled:hover {
   font-size: 2rem;
   font-weight: 800;
   color: #fff;
-  background: linear-gradient(140deg, #10b981, #047857);
-  box-shadow: 0 10px 24px rgb(4 120 87 / 28%);
+  background: linear-gradient(140deg, #22c55e, #059669);
+  box-shadow: 0 12px 28px rgb(5 150 105 / 30%);
 }
 
 .thank-you-kicker {
@@ -530,14 +541,19 @@ button:disabled:hover {
   letter-spacing: 0.09em;
   font-size: 0.78rem;
   font-weight: 800;
-  color: var(--success);
+  color: #047857;
 }
 
 .thank-you-note {
-  margin: 0 auto 1.2rem;
+  margin: 0 auto 0.7rem;
   max-width: 54ch;
-  color: #334155;
+  color: #14532d;
   font-weight: 500;
+}
+
+.thank-you-banner .lead {
+  color: #065f46;
+  font-weight: 600;
 }
 
 @keyframes fadeUp {
