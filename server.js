@@ -8,8 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const publicDir = path.join(__dirname, "public");
 const privateDir = path.join(__dirname, "private");
-// Force /var/data for persistent storage on Render, fallback to ./data locally
-const dataDir = process.env.NODE_ENV === "production" ? "/var/data" : (process.env.DATA_DIR || path.join(__dirname, "data"));
+const dataDir = "/var/data";
 const dbFile = process.env.DB_FILE ? path.resolve(process.env.DB_FILE) : path.join(dataDir, "leads.sqlite");
 const siteUrl = process.env.SITE_URL || `http://localhost:${port}`;
 const privacyPolicyVersion = "2026-03-25";
