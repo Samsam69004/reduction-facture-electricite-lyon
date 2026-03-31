@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fsSync = require("fs");
 const fs = require("fs/promises");
 const sqlite3 = require("sqlite3");
 const crypto = require("crypto");
@@ -8,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const publicDir = path.join(__dirname, "public");
 const privateDir = path.join(__dirname, "private");
-const defaultDataDir = path.join(__dirname, "data");
+const defaultDataDir = fsSync.existsSync("/var/data") ? "/var/data" : path.join(__dirname, "data");
 const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : defaultDataDir;
 const dbFile = process.env.DB_FILE ? path.resolve(process.env.DB_FILE) : path.join(dataDir, "leads.sqlite");
 const siteUrl = process.env.SITE_URL || `http://localhost:${port}`;
