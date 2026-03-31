@@ -548,6 +548,10 @@ app.get("/politique-confidentialite.html", async (req, res) => {
 app.get("/merci", async (req, res) => {
   try {
     const html = await renderPublicTemplate("merci.html");
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Surrogate-Control", "no-store");
     res.type("html").send(html);
   } catch (error) {
     res.status(500).type("text/plain").send("Erreur de chargement de la page.");
