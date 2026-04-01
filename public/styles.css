@@ -632,3 +632,52 @@ button:disabled:hover {
     height: 134px;
   }
 }
+
+@media (max-width: 560px) {
+  .merci-main {
+    width: 94%;
+    padding-top: 20px;
+    padding-bottom: 28px;
+  }
+
+  .thank-you-banner {
+    border-radius: 14px;
+    padding: 0.9rem 0.85rem 1rem;
+  }
+
+  .thank-you-logo-orb {
+    width: 118px;
+    height: 118px;
+    border-width: 4px;
+    margin-bottom: 0.65rem;
+  }
+
+  .thank-you-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .thank-you-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+  }
+
+  .thank-you-banner h1 {
+    font-size: 2rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .thank-you-banner .lead,
+  .thank-you-note {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .quick-cta {
+    width: 100%;
+    max-width: 260px;
+    text-align: center;
+  }
+}
