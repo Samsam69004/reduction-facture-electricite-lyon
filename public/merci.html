@@ -8,7 +8,35 @@
     <link rel="canonical" href="__SITE_URL__/merci" />
     <meta property="og:title" content="Merci pour votre demande | Étude Énergie Lyon" />
     <meta property="og:url" content="__SITE_URL__/merci" />
-    <link rel="stylesheet" href="/styles.css?v=20260401-merci-mobile" />
+      <link rel="stylesheet" href="/styles.css?v=20260401-merci-mobile-fix" />
+      <style>
+        .thank-you-logo {
+          width: 82%;
+          max-width: 140px;
+          height: auto;
+        }
+
+        .thank-you-logo-orb {
+          width: 140px;
+          height: 140px;
+          margin: 0 auto 0.85rem;
+          border-radius: 999px;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+        }
+
+        @media (max-width: 520px) {
+          .thank-you-banner {
+            padding: 0.9rem;
+          }
+
+          .thank-you-logo-orb {
+            width: 116px;
+            height: 116px;
+          }
+        }
+      </style>
   </head>
   <body class="merci-page">
     <main class="container merci-main">
