@@ -9,8 +9,16 @@ const port = process.env.PORT || 3000;
 const publicDir = path.join(__dirname, "public");
 const privateDir = path.join(__dirname, "private");
 const isRender = Boolean(process.env.RENDER);
-const dataDir = isRender ? "/var/data" : process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, "data");
-const dbFile = path.join(dataDir, "leads.sqlite");
+const preferredDataDir = isRender
+  ? process.env.DATA_DIR
+    ? path.resolve(process.env.DATA_DIR)
+    : "/var/data"
+  : process.env.DATA_DIR
+    ? path.resolve(process.env.DATA_DIR)
+    : path.join(__dirname, "data");
+const fallbackDataDir = path.join(__dirname, "data");
+let dataDir = preferredDataDir;
+let dbFile = path.join(dataDir, "leads.sqlite");
 const siteUrl = process.env.SITE_URL || `http://localhost:${port}`;
 const privacyPolicyVersion = "2026-03-25";
 const leadRetentionDays = 365;
@@ -420,7 +428,18 @@ const ensureLeadColumns = async () => {
 };
 
 const initializeDatabase = async () => {
-  await fs.mkdir(dataDir, { recursive: true });
+  try {
+    await fs.mkdir(dataDir, { recursive: true });
+  } catch (error) {
+    if (dataDir !== fallbackDataDir && (error.code === "EACCES" || error.code === "EROFS")) {
+      console.warn(`Stockage persistant indisponible sur ${dataDir}, fallback sur ${fallbackDataDir}.`);
+      dataDir = fallbackDataDir;
+      dbFile = path.join(dataDir, "leads.sqlite");
+      await fs.mkdir(dataDir, { recursive: true });
+    } else {
+      throw error;
+    }
+  }
 
   db = new sqlite3.Database(dbFile);
 
